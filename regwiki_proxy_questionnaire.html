@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="snowflake-source" content="cortex-agent-authored" />
+<title>규제Wiki 사내 오픈 관련 확인 필요 사항</title>
+<script type="application/json" id="snowflake-report-metadata">
+{
+  "generated": "2026-10-15",
+  "intent": "규제Wiki EIP 퀵링크 오픈(Snowflake 앱 + 사내 인증 프록시)을 위해 유관 부서에 보내는 확인 요청 사항",
+  "dataSources": [
+    { "type": "document", "path": "ktng_app_report/regwiki_eip_open_report.html" }
+  ],
+  "sections": [
+    { "id": "intro", "title": "요청 배경" },
+    { "id": "infra", "title": "A. 인프라 / 서버 관련", "producerNotes": "질문 1~13" },
+    { "id": "network", "title": "B. 네트워크 관련", "producerNotes": "질문 14~18" },
+    { "id": "security", "title": "C. 보안 관련", "producerNotes": "질문 19~21" },
+    { "id": "eip", "title": "D. EIP / 운영", "producerNotes": "질문 22" }
+  ]
+}
+</script>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Malgun Gothic", -apple-system, system-ui, sans-serif;
+    max-width: 960px; width: 100%; margin: 0 auto; padding: clamp(16px, 4vw, 32px);
+    color: light-dark(#1f2937, #e5e7eb); background: light-dark(#ffffff, #0f172a);
+    line-height: 1.6; font-size: 14.5px;
+  }
+  h1 { font-size: 24px; margin: 0 0 6px; color: light-dark(#0f172a, #f1f5f9); }
+  h2 { font-size: 19px; margin: 40px 0 10px; padding-bottom: 6px;
+       border-bottom: 2px solid #29b5e8; color: light-dark(#0f172a, #f1f5f9); }
+  h3 { font-size: 15.5px; margin: 22px 0 8px; color: light-dark(#0369a1, #7dd3fc); }
+  .meta { color: light-dark(#64748b, #94a3b8); font-size: 13px; }
+  code { font-family: Consolas, monospace; font-size: 12.5px; padding: 1px 5px; border-radius: 4px;
+         background: light-dark(#f1f5f9, #1e293b); word-break: break-all; }
+  .box { border-radius: 10px; padding: 14px 18px; margin: 14px 0;
+         background: light-dark(#f0f9ff, #0c2a3d); border: 1px solid light-dark(#bae6fd, #155e75); }
+  .box p { margin: 6px 0; }
+  .toc a { color: light-dark(#2563eb, #60a5fa); }
+  .table-wrap { overflow-x: auto; margin: 10px 0 16px; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid light-dark(#cbd5e1, #334155); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: light-dark(#f1f5f9, #1e293b); font-weight: 700; white-space: nowrap; }
+
+  /* 질문 카드 */
+  .q { border: 1px solid light-dark(#cbd5e1, #334155); border-radius: 10px; margin: 12px 0; overflow: hidden;
+       break-inside: avoid; }
+  .q-head { display: flex; gap: 10px; padding: 10px 14px; background: light-dark(#f8fafc, #172033); }
+  .q-no { flex: 0 0 auto; min-width: 30px; height: 26px; border-radius: 13px; background: #29b5e8; color: #fff;
+          font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; padding: 0 8px; }
+  .q-text { flex: 1; }
+  .q-text b { color: light-dark(#0f172a, #f8fafc); }
+  .q-why { display: block; margin-top: 4px; font-size: 12.5px; color: light-dark(#64748b, #94a3b8); }
+  .opts { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0 0 8px; }
+  .opts span { white-space: nowrap; }
+  .sub { margin: 6px 0 0; padding-left: 18px; }
+  .hint { font-size: 12.5px; color: light-dark(#64748b, #94a3b8); }
+
+  @media print {
+    :root { color-scheme: light; }
+    body { max-width: none; padding: 0; font-size: 12px; }
+    .toc, .no-print { display: none; }
+    h2 { break-before: page; }
+    h2#intro { break-before: auto; }
+  }
+</style>
+</head>
+<body>
+
+<h1>규제Wiki 사내 오픈 관련 확인 필요 사항</h1>
+<div class="meta">요청일 2026-10-15</div>
+
+<div class="toc box no-print">
+  <b>담당 부서별 질문</b>
+  <ul style="margin:6px 0 0">
+    <li><a href="#infra">A. 인프라 / 서버 관련</a> — 질문 1~13</li>
+    <li><a href="#network">B. 네트워크 관련</a> — 질문 14~18</li>
+    <li><a href="#security">C. 정보보호 / 보안 관련</a> — 질문 19~21</li>
+    <li><a href="#eip">D. EIP 관련</a> — 질문 22</li>
+  </ul>
+</div>
+
+<!-- ============================ 배경 ============================ -->
+<h2 id="intro">요청 배경</h2>
+<div class="box">
+  <p>규제Wiki 웹앱을 <b>Snowflake</b>(외부 클라우드, <code>*.snowflakecomputing.app</code>)에서 운영하고, 직원이 EIP 퀵링크로 <b>로그인 없이</b> 접속하게 하려고 합니다.</p>
+  <p>이를 위해 사내망 앞단에 <b>리버스 프록시</b>가 필요합니다. 프록시는 직원 요청을 받아 Snowflake 앱으로 넘기면서, 서비스 계정 키로 발급받은 <b>인증 토큰을 헤더에 붙입니다.</b></p>
+  <p>토큰은 30분 이내 주기로 다시 발급받아야 해서, 고정 헤더가 아니라 <b>스크립트나 작은 프로그램</b>이 필요합니다. 직원 PC 쪽은 변경이 없습니다.</p>
+</div>
+<div class="table-wrap"><table>
+  <tr><th>구분</th><th>내용</th></tr>
+  <tr><td>요청 흐름</td><td>직원 브라우저 → 사내 프록시(토큰 추가) → Snowflake 앱 → 화면 반환</td></tr>
+  <tr><td>여기서 말하는 "프록시"</td><td><b>사내 주소로 들어온 요청을 받아 넘겨 주는 리버스 프록시</b>입니다. 직원 PC가 인터넷에 나갈 때 거치는 인터넷 프록시(포워드 프록시)와는 다릅니다.</td></tr>
+  <tr><td>구현 방법</td><td>① 기존 프록시/게이트웨이 장비에 토큰 발급·갱신 스크립트 삽입<br>② ①이 불가하면 작은 중계 프로그램을 별도 서버/컨테이너에서 실행</td></tr>
+  <tr><td>Snowflake 접속 주소</td><td><code>a1555446549771-ktng-poc.snowflakecomputing.com</code> (토큰 발급)<br><code>&lt;앱&gt;.snowflakecomputing.app</code> (앱 접속, Wiki 앱 배포 후 확정)</td></tr>
+</table></div>
+
+<!-- ============================ A. 인프라 ============================ -->
+<h2 id="infra">A. 인프라 / 서버 관련</h2>
+<h3>A-1. 현재 구성</h3>
+<div class="q"><div class="q-head"><span class="q-no">1</span><div class="q-text"><b>사내 웹 서비스 앞단에 쓰는 리버스 프록시나 게이트웨이가 있나요?</b>
+  <span class="q-why">직원 PC의 인터넷용 프록시가 아니라, 사내 주소로 들어오는 요청을 받아 넘기는 장비를 말합니다.</span></div></div></div>
+
+<div class="q"><div class="q-head"><span class="q-no">2</span><div class="q-text"><b>있다면 제품이나 프로그램 이름과 버전은 무엇인가요?</b>
+  <span class="q-why">스크립트 내용이 제품에 따라 달라져서 확인이 필요합니다.</span></div></div></div>
+
+<div class="q"><div class="q-head"><span class="q-no">3</span><div class="q-text"><b>프록시와 게이트웨이가 같은 장비인가요, 따로인가요? 앞단에 L4 스위치나 로드밸런서가 있나요?</b>
+  <span class="q-why">어느 장비에 무엇을 넣을지 정하기 위해 필요합니다.</span></div></div></div>
+
+<div class="q"><div class="q-head"><span class="q-no">4</span><div class="q-text"><b>각 장비의 운영체제는 무엇인가요?</b>
+  <span class="q-why">예: Linux 배포판·버전, Windows Server, 전용 장비 OS. 프로그램 실행·등록 방식이 달라집니다.</span></div></div></div>
+
+<div class="q"><div class="q-head"><span class="q-no">5</span><div class="q-text"><b>장비가 어디 위치에 어떤 형태로 있나요?</b></div></div></div>
+
+<h3>A-2. 방법 ①: 기존 장비에 스크립트 삽입</h3>
+<div class="q"><div class="q-head"><span class="q-no">6</span><div class="q-text"><b>그 장비에서 스크립트나 확장 기능을 쓸 수 있나요?</b>
+  <span class="q-why">예: nginx njs/Lua, F5 iRules, 게이트웨이 플러그인.</span></div></div></div>
+
+<div class="q"><div class="q-head"><span class="q-no">7</span><div class="q-text"><b>스크립트가 장비에서 직접 외부(Snowflake)로 HTTPS 요청을 보낼 수 있나요?</b>
+  <span class="q-why">토큰을 발급받으려면 장비가 직접 Snowflake에 요청해야 합니다.</span></div></div></div>
+
+<div class="q"><div class="q-head"><span class="q-no">8</span><div class="q-text"><b>스크립트가 값을 메모리에 보관해 두고, 주기적으로(예: 25분마다) 실행할 수 있나요?</b>
+  <span class="q-why">받은 토큰을 보관해 두고 만료 전에 다시 받아야 합니다.</span></div></div></div>
+
+<div class="q"><div class="q-head"><span class="q-no">9</span><div class="q-text"><b>장비에 개인키 파일을 둘 수 있나요?</b>
+  <span class="q-why">토큰 발급에 쓰는 서비스 계정 개인키를 장비가 읽을 수 있어야 합니다.</span></div></div></div>
+
+<h3>A-3. 방법 ②: 중계 프로그램 별도 실행 (①이 불가할 때)</h3>
+<div class="q"><div class="q-head"><span class="q-no">10</span><div class="q-text"><b>작은 프로그램을 상시 실행하는 자리를 할당 받을 수 있나요?</b>
+  <span class="q-why">요청을 전달만 하는 작은 프로그램이라 CPU와 메모리를 거의 쓰지 않고, 화면을 만들거나 데이터를 처리하지 않아 부하가 매우 작습니다.</span></div></div></div>
+
+<div class="q"><div class="q-head"><span class="q-no">11</span><div class="q-text"><b>그 서버에 Node.js 18 이상을 설치할 수 있나요? 안 되면 단일 exe 파일이나 컨테이너 이미지 반입이 허용되나요?</b></div></div></div>
+
+<div class="q"><div class="q-head"><span class="q-no">12</span><div class="q-text"><b>프로세스를 서비스로 등록하는 것이 가능한가요? (자동 시작, 장애 시 재시작 목적)</b></div></div></div>
+
+<div class="q"><div class="q-head"><span class="q-no">13</span><div class="q-text"><b>앞단 장비에서 "이 주소로 들어온 요청은 중계 서버로 넘겨라"는 전달 설정을 추가해 줄 수 있나요?</b></div></div></div>
+
+<!-- ============================ B. 네트워크 ============================ -->
+<h2 id="network">B. 네트워크 관련</h2>
+<div class="q"><div class="q-head"><span class="q-no">14</span><div class="q-text"><b>프록시나 중계 서버에서 아래 두 주소로 443 포트를 통해 나가는 통신을 허용할 수 있나요?</b>
+  <ul class="sub">
+    <li><code>a1555446549771-ktng-poc.snowflakecomputing.com</code> — 토큰 발급</li>
+    <li><code>&lt;앱&gt;.snowflakecomputing.app</code> — 앱 접속(Wiki 앱 배포 후 확정)</li>
+  </ul></div></div></div>
+
+<div class="q"><div class="q-head"><span class="q-no">15</span><div class="q-text"><b>나가는 통신이 사내 인터넷 프록시(포워드 프록시)를 반드시 거쳐야 하나요? 그렇다면 주소, 포트, 인증 방식은 무엇인가요?</b>
+  <span class="q-why">거쳐야 하면 중계 코드에 프록시 경유 설정을 추가해야 합니다.</span></div></div></div>
+
+<div class="q"><div class="q-head"><span class="q-no">16</span><div class="q-text"><b>그 서버의 외부 출구 IP(공인 IP)는 무엇인가요? 고정 IP인가요?</b>
+  <span class="q-why">Snowflake 네트워크 정책에 등록해, 그 IP에서만 서비스 계정이 로그인되게 하려면 필요합니다.</span></div></div></div>
+
+<div class="q"><div class="q-head"><span class="q-no">17</span><div class="q-text"><b>응답 크기와 시간 제한이 있나요?</b>
+  <span class="q-why">원본 PDF는 약 6MB이고, 화면 응답 대기는 60초 이상이 필요할 수 있습니다.</span></div></div></div>
+
+<div class="q"><div class="q-head"><span class="q-no">18</span><div class="q-text"><b>사내 도메인의 HTTPS 인증서는 어떻게 발급받나요?</b>
+  <span class="q-why">사내 CA인지 공인 인증서인지, HTTPS 처리를 앞단 장비가 맡는지 확인이 필요합니다.</span></div></div></div>
+
+<!-- ============================ C. 보안 ============================ -->
+<h2 id="security">C. 정보보호 / 보안 관련</h2>
+<div class="q"><div class="q-head"><span class="q-no">19</span><div class="q-text"><b>SSL 인스펙션이 Snowflake 방향 통신에도 걸리나요? 검사 예외(Snowflake 주소 제외)가 가능한가요?</b></div></div></div>
+
+<div class="q"><div class="q-head"><span class="q-no">20</span><div class="q-text"><b>서비스 계정 개인키 보관 기준이 있나요?</b>
+  <span class="q-why">파일 권한 제한으로 충분한지, 암호화 키를 써야 하는지, Vault 같은 비밀 관리 시스템을 써야 하는지.</span></div></div></div>
+
+<div class="q"><div class="q-head"><span class="q-no">21</span><div class="q-text"><b>키 교체 주기 기준이 있나요?</b></div></div></div>
+
+<!-- ============================ D. EIP / 운영 ============================ -->
+<h2 id="eip">D. EIP 관련</h2>
+
+<div class="q"><div class="q-head"><span class="q-no">22</span><div class="q-text"><b>사내 테스트 환경(개발 프록시, 개발 도메인)을 먼저 받아 시험할 수 있나요?</b></div></div></div>
+
+
+
+</body>
+</html>
